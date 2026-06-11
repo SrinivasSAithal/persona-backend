@@ -115,3 +115,73 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# ── Django REST Framework ──────────────────────────────────────────────────────
+
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "core.exceptions.handler.custom_exception_handler",
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+}
+
+# ── Logging ────────────────────────────────────────────────────────────────────
+# Output structure:  2026-06-11 22:30:15 | INFO | <message>
+# Destinations:      console  /  logs/application.log  /  logs/errors.log
+
+LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    # ── Formatters ──────────────────────────────────────────────────────────
+    "formatters": {
+        "structured": {
+            "format": "%(asctime)s | %(levelname)s | %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+
+    # ── Handlers ────────────────────────────────────────────────────────────
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "structured",
+        },
+        "application_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGS_DIR / "application.log",
+            "maxBytes": 5 * 1024 * 1024,   # 5 MB
+            "backupCount": 5,
+            "formatter": "structured",
+            "encoding": "utf-8",
+        },
+        "error_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOGS_DIR / "errors.log",
+            "maxBytes": 5 * 1024 * 1024,   # 5 MB
+            "backupCount": 5,
+            "level": "ERROR",
+            "formatter": "structured",
+            "encoding": "utf-8",
+        },
+    },
+
+    # ── Loggers ─────────────────────────────────────────────────────────────
+    "loggers": {
+        # Project-wide logger used by all core utilities
+        "core": {
+            "handlers": ["console", "application_file", "error_file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        # Django internals
+        "django": {
+            "handlers": ["console", "application_file", "error_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
